@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="hd_gtm_portal_frontend_layout" inherit_id="portal.frontend_layout" name="GTM Main Frontend Layout"
+              priority="100">
+        <xpath expr="//div[@id='wrapwrap']" position="before">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                &lt;!-- Google Tag Manager (noscript) --&gt;
+                <noscript>
+                    <iframe t-attf-src="https://www.googletagmanager.com/ns.html?id={{ website.hd_google_tag_manager_key }}"
+                            height="0" width="0" style="display:none;visibility:hidden"/>
+                </noscript>
+                &lt;!-- End Google Tag Manager (noscript) --&gt;
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_web_layout" name="GTM Main layout" inherit_id="web.layout" priority="100">
+        <xpath expr="//meta" position="after">
+            <script>
+                dataLayer = [{}];
+            </script>
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                &lt;!-- Google Tag Manager --&gt;
+                <script id="hd_gtm_code">
+                    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                    j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
+                    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                    })(window,document,'script','dataLayer','<t t-esc="website.hd_google_tag_manager_key"/>');
+                </script>
+                &lt;!-- End Google Tag Manager --&gt;
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_products_item1" name="GTM Products Item List"
+              inherit_id="website_sale.products_item" priority="100">
+        <xpath expr="//a[@itemprop='url']" position="attributes">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <attribute name="t-attf-onclick" separator=" "
+                           add="dataLayer.push({ ecommerce: null });
+                           dataLayer.push(
+                              { 'event': 'productClick',
+                                'ecommerce': { 'click': { 'actionField': {'list': 'Shop Page'},
+                                               'products': [{
+                                               'id': '{{ product.id }}',
+                                               'name': '{{ product.name }}',
+                                               'barcode': '{{ product.default_code if product.default_code else product.name }}',
+                                               'price': '{{ combination_info['price'] }}',
+                                               'category': '{{ product.categ_id.name if product.categ_id else '' }}'}] } } })"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_products_item2" name="GTM Products Item List"
+              inherit_id="website_sale.products_item" priority="100">
+        <xpath expr="//a[@itemprop='name']" position="attributes">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <attribute name="t-attf-onclick" separator=" "
+                           add="dataLayer.push({ ecommerce: null });
+                           dataLayer.push(
+                              { 'event': 'productClick',
+                                'ecommerce': { 'click': { 'actionField': {'list': 'Shop Page'},
+                                               'products': [{
+                                               'id': '{{ product.id }}',
+                                               'name': '{{ product.name }}',
+                                               'barcode': '{{ product.default_code if product.default_code else product.name }}',
+                                               'price': '{{ combination_info['price'] }}',
+                                               'category': '{{ product.categ_id.name if product.categ_id else '' }}'}] } } })"/>
+            </t>
+        </xpath>
+    </template>
+
+
+    <template id="hd_gtm_products_add_to_cart" name="GTM Product Items Add Cart"
+              inherit_id="website_sale.products_add_to_cart" priority="100">
+        <xpath expr="//a[hasclass('a-submit')]" position="attributes">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <attribute name="t-attf-onclick" separator=" "
+                           add="dataLayer.push({ ecommerce: null });
+                           dataLayer.push({
+                                  'event': 'addToCart',
+                                  'currencyCode': '{{ website.currency_id.name }}',
+                                  'add': {
+                                  'products': [
+                                  { 'id': '{{ product.id }}',
+                                    'name': '{{ product.name }}',
+                                    'barcode': '{{ product.default_code if product.default_code else product.name }}',
+                                    'price': '{{ combination_info['price'] }}',
+                                    'category': '{{ product.categ_id.name if product.categ_id else '' }}',
+                                    'quantity': 1
+                                    }] } });"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_products" name="GTM Product Items Detail"
+              inherit_id="website_sale.products" priority="100">
+        <xpath expr="//div[@id='wrap']" position="before">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <script>
+                    dataLayer.push({ ecommerce: null });
+                    dataLayer.push({
+                    'event': 'productsImpression',
+                    'ecommerce': {
+                    'currencyCode': '<t t-esc="website.currency_id.name"/>',
+                    'impressions': [
+                    <t t-set="position" t-value="1"/>
+                    <t t-foreach="products" t-as="product">
+                        <t t-set="combination_info" t-value="product._get_combination_info(only_template=True, add_qty=add_qty or 1, pricelist=pricelist)"/>
+                        {
+                        'id': '<t t-esc="product.id"/>',
+                        'name': '<t t-esc="product.name"/>',
+                        'barcode': '<t t-if="product.default_code" t-esc="product.default_code"/><t t-else="" t-esc="product.name"/>',
+                        'price': '<t t-esc="combination_info['price']"/>',
+                        <t t-if="category">'category': '<t t-esc="product.categ_id.name"/>',
+                        </t>
+                        'list': 'Shop Page',
+                        'position':<t t-esc="position"/>
+                        },<t t-set="position" t-value="position+1"/>
+                    </t>
+                    ]
+                    }
+                    });
+                </script>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_product" name="GTM Product Item"
+              inherit_id="website_sale.product" priority="200">
+        <xpath expr="//a[@id='add_to_cart']" position="attributes">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <attribute name="t-attf-onclick" separator=" "
+                           add="dataLayer.push({
+                                  'event': 'addToCart',
+                                  'currencyCode': '{{ website.currency_id.name }}',
+                                  'add': {
+                                  'products': [
+                                  { 'id': '{{ product.id }}',
+                                    'name': '{{ product.name }}',
+                                    'barcode': '{{ product.default_code if product.default_code else product.name }}',
+                                    'price': '{{ combination_info['price'] }}',
+                                    'category': '{{ product.categ_id.name if product.categ_id else '' }}',
+                                    'quantity': 1
+                                    }] } });"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_remove_product" name="GTM Remove Product Item"
+              inherit_id="website_sale.cart_lines" priority="200">
+        <xpath expr="//a[hasclass('js_delete_product')]" position="attributes">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <attribute name="t-attf-onclick" separator=" "
+                           add="dataLayer.push({
+                                  'event': 'removeFromCart',
+                                  'currencyCode': '{{ website.currency_id.name }}',
+                                  'remove': {
+                                  'products': [
+                                  { 'id': '{{ line.product_id.product_tmpl_id.id }}',
+                                    'name': '{{ line.product_id.name }}',
+                                    'barcode': '{{ line.product_id.barcode }}',
+                                    'price': '{{ line.price_reduce_taxinc }}',
+                                    'category': '{{ line.product_id.categ_id.name if line.product_id.categ_id else '' }}',
+                                    'quantity': {{ line.product_uom_qty }}
+                                    }] } });"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_cart" name="GTM Shopping Cart Details [STEP 1]"
+              inherit_id="website_sale.cart" priority="100">
+        <xpath expr="//div[@id='wrap']" position="after">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <script>
+                    dataLayer.push({ ecommerce: null });
+                    dataLayer.push({
+                    'event': 'checkout',
+                    'ecommerce': {
+                    'checkout': {
+                    'actionField': {
+                                    'step': 1,
+                                    'option': 'Review Shop Cart'
+                                    },
+                    'products': [
+                    <t t-foreach="website_sale_order.website_order_line" t-as="line">
+                        {
+                        'id': '<t t-esc="line.product_id.id"/>',
+                        'name': '<t t-esc="line.product_id.name"/>',
+                        'barcode': '<t t-if="line.product_id.default_code" t-esc="line.product_id.default_code"/><t t-else="" t-esc="line.product_id.name"/>',
+                        'price': '<t t-esc="line.price_reduce_taxinc"/>',
+                        'quantity':<t t-esc="line.product_uom_qty"/>,
+                        },
+                    </t>
+                    ]
+                    }
+                    }
+                    });
+                </script>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_payment" name="GTM Collect Payment Information [STEP 2]"
+              inherit_id="website_sale.payment" priority="100">
+        <xpath expr="//div[@id='wrap']" position="after">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <script>
+                    dataLayer.push({ ecommerce: null });
+                    dataLayer.push({
+                    'event': 'checkoutOption',
+                    'ecommerce': {
+                    'checkout_option': {
+                    'actionField': {
+                                    'step': '2',
+                                    'option': 'Collect Order Payment Information',
+                                    'partnerEmail': '<t t-esc="website_sale_order.partner_id.email"/>',
+                                    },
+                    'products': [
+                    <t t-foreach="website_sale_order.website_order_line" t-as="line">
+                        {
+                        'id': '<t t-esc="line.product_id.id"/>',
+                        'name': '<t t-esc="line.product_id.name"/>',
+                        'barcode': '<t t-if="line.product_id.default_code" t-esc="line.product_id.default_code"/><t t-else="" t-esc="line.product_id.name"/>',
+                        'price': '<t t-esc="line.price_reduce_taxinc"/>',
+                        'quantity':<t t-esc="line.product_uom_qty"/>,
+                        },
+                    </t>
+                    ]
+                    }
+                    }
+                    });
+                </script>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="hd_gtm_website_sale_confirmation" name="GTM Order Confirmation Payment  [STEP 3]"
+              inherit_id="website_sale.confirmation">
+        <xpath expr="//div[@id='wrap']" position="after">
+            <t t-if="website and website.hd_has_google_tag_manager and website.hd_google_tag_manager_key">
+                <script>
+                    dataLayer.push({
+                    'event': 'transaction',
+                    'ecommerce': {
+                    'purchase': {
+                    'actionField': {
+                    'order ref': '<t t-esc="website_sale_order.reference"/>',
+                    'id': '<t t-esc="website_sale_order.id"/>',
+                    'website': '<t t-esc="website.name"/>',
+                    'subtotal':<t t-esc="website_sale_order.amount_untaxed"/>,
+                    'tax':<t t-esc="website_sale_order.amount_tax"/>,
+                    'shipping': <t t-if="website_sale_order.amount_delivery" t-esc="website_sale_order.amount_delivery"/><t t-else="" t-esc= "0.0"/>
+                    },
+                    'products': [
+                    <t t-foreach="order.order_line" t-as="line">
+                        {
+                        'id': '<t t-esc="line.product_id.id"/>',
+                        'name': '<t t-esc="line.product_id.name"/>',
+                        'barcode': '<t t-if="line.product_id.default_code" t-esc="line.product_id.default_code"/><t t-else="" t-esc="line.product_id.name"/>',
+                        'price': '<t t-esc="line.price_reduce_taxinc"/>',
+                        'category': '<t t-esc="line.product_id.categ_id.name"/>',
+                        'quantity':<t t-esc="line.product_uom_qty"/>
+                        },
+                    </t>
+                    ] } } });
+                </script>
+            </t>
+        </xpath>
+    </template>
+</odoo>

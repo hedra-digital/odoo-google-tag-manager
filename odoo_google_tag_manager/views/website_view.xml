@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="inherit_website_google_tag_manager_form" model="ir.ui.view">
+        <field name="name">inherit.website.google.tag.manager.form</field>
+        <field name="model">website</field>
+        <field name="inherit_id" ref="website.view_website_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='other']" position='inside'>
+                <field name="hd_has_google_tag_manager"/>
+                <field name="hd_google_tag_manager_key" placeholder="GTM-XXXXXXX" attrs="{'invisible': [('hd_has_google_tag_manager', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
